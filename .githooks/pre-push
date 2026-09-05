@@ -1,0 +1,18 @@
+#!/bin/sh
+# Last local guard before code leaves the private repo.
+
+set -u
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$repo_root" || exit 0
+
+if command -v python3 >/dev/null 2>&1; then
+    py=python3
+elif command -v python >/dev/null 2>&1; then
+    py=python
+else
+    echo "[davosbot hook] python not found; skipped repo cleanliness check"
+    exit 0
+fi
+
+"$py" scripts/check_repo_cleanliness.py --all

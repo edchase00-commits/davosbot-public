@@ -1,0 +1,97 @@
+name: tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, main, "codex/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Check private repo cleanliness
+        run: python scripts/check_repo_cleanliness.py --all
+      - name: Run validation
+        run: bash scripts/validate.sh
+      - name: Install pinned Work image decoder
+        run: >-
+          python -m pip install --only-binary=:all: --index-url https://pypi.org/simple -r requirements-work-images.txt
+      - name: Validate Work image decoder and guarded images
+        shell: bash
+        run: |
+          python - <<'PY'
+          from importlib.metadata import version
+          from PIL import Image
+          if version("Pillow") != "12.2.0" or Image.__version__ != "12.2.0":
+              raise SystemExit("Pinned Pillow 12.2.0 decoder required")
+          print("Pillow 12.2.0 decoder available")
+          PY
+          python scripts/quality_check.py images --timeout 180
+      - name: Validate sanitized public snapshot
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          function Invoke-Checked {
+            param([scriptblock]$Command, [string]$Description)
+            & $Command
+            if ($LASTEXITCODE -ne 0) {
+              throw "$Description failed with exit code $LASTEXITCODE."
+            }
+          }
+
+          $exportScript = Join-Path (Get-Location) "scripts/export_public_snapshot.ps1"
+          if (Test-Path -LiteralPath $exportScript) {
+            $dest = Join-Path $env:RUNNER_TEMP "davosbot-public"
+            & $exportScript -Destination $dest
+            Push-Location $dest
+            try {
+              Invoke-Checked { python -m py_compile main.py } "py_compile"
+              Invoke-Checked { python -m compileall -q davosbot } "compileall"
+              Invoke-Checked { python -m unittest discover -s tests -q } "public snapshot tests"
+            } finally {
+              Pop-Location
+            }
+          } else {
+            $dest = (Get-Location).Path
+          }
+
+          Invoke-Checked { python scripts/clean_public_snapshot.py $dest } "public snapshot artifact cleanup"
+          Invoke-Checked { python scripts/scan_public_snapshot.py $dest } "public snapshot private-marker scan"
+
+  publish-public-snapshot:
+    needs: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      github.repository == 'example/davosbot' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Publish sanitized public snapshot
+        shell: pwsh
+        env:
+          PUBLIC_SNAPSHOT_TOKEN: ${{ secrets.PUBLIC_SNAPSHOT_TOKEN }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          if ([string]::IsNullOrWhiteSpace($env:PUBLIC_SNAPSHOT_TOKEN)) {
+            Write-Host "PUBLIC_SNAPSHOT_TOKEN is not configured; skipping public snapshot publish."
+            return
+          }
+          ./scripts/publish_public_snapshot.ps1

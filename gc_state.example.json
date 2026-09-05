@@ -1,0 +1,6 @@
+{
+  "_README": "gc_state.json tracks which group chats the bot is active in, which phone numbers have friend-tier access, and per-chat persona assignments. Copy this file to gc_state.json and populate it as you enable chats. All values here are placeholders — real GC GUIDs are 32-character hex strings visible in the macOS Messages SQLite DB (chat.db). Phone numbers must be E.164 format (+1XXXXXXXXXX for US numbers). Persona names must match a file in personalities/ (without the .md extension).",
+  "enabled_chats": [],
+  "approved_users": [],
+  "personas": {}
+}

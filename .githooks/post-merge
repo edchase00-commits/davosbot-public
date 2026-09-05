@@ -1,0 +1,27 @@
+#!/bin/sh
+# DavosBot local pull hook. Keep this lightweight: the bot's pull command
+# handles PM2 restart separately after git pull completes.
+
+set -u
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$repo_root" || exit 0
+
+echo "[davosbot hook] post-merge: $(git log -1 --oneline 2>/dev/null)"
+
+if command -v python3 >/dev/null 2>&1; then
+    if PYTHONDONTWRITEBYTECODE=1 python3 -m compileall -q .; then
+        echo "[davosbot hook] compileall ok"
+    else
+        echo "[davosbot hook] compileall failed"
+        exit 1
+    fi
+    if [ -f scripts/codex_sync_status.py ]; then
+        PYTHONDONTWRITEBYTECODE=1 python3 scripts/codex_sync_status.py --brief || true
+    fi
+else
+    echo "[davosbot hook] python3 not found; skipped compileall"
+fi
+
+echo "[davosbot hook] PM2 restart remains controlled by pull/manual deploy"
+exit 0

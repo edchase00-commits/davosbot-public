@@ -1,0 +1,49 @@
+.env
+davosbot.db
+__pycache__/
+*.pyc
+*.pyo
+*.tsbuildinfo
+.DS_Store
+venv/
+.venv/
+.cursor/
+.windsurf/
+*.log
+logs/
+
+# Private transcript exports
+exports/private/
+
+# Auto-deploy watcher worktrees and local status
+.auto_deploy/
+
+# Package delivery monitor acknowledgements and process lock
+.package_delivery/
+.work_bridge/
+
+# Personal-data files — copy the .example versions and fill in locally
+MEMORY.md
+SOUL.md
+gc_state.json
+gc_state.json.tmp
+personalities/*.md
+!personalities/example.md
+
+# Generated vCards / contact files
+generated/
+
+# DB backups
+backups/
+*.db
+**/davosbot.db
+**/MEMORY.md
+**/SOUL.md
+**/gc_state.json
+**/generated/
+**/backups/
+**/.auto_deploy/
+
+# Local public snapshot/export scratch dirs
+public-snapshot/
+davosbot-public/
