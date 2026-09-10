@@ -1,0 +1,41 @@
+#!/bin/sh
+# Enforce conventional commit subjects for DavosBot.
+
+set -u
+
+msg_file="${1:-}"
+if [ -z "$msg_file" ] || [ ! -f "$msg_file" ]; then
+    echo "[davosbot hook] commit-msg: missing commit message file"
+    exit 1
+fi
+
+subject="$(sed -n '1p' "$msg_file" | tr -d '\r')"
+
+# Git-generated and autosquash messages should stay frictionless.
+case "$subject" in
+    Merge\ *|Revert\ *|fixup!\ *|squash!\ *)
+        exit 0
+        ;;
+esac
+
+pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|ops)(\([A-Za-z0-9._/-]+\))?!?: .+'
+
+if printf '%s\n' "$subject" | grep -Eq "$pattern"; then
+    exit 0
+fi
+
+cat >&2 <<'EOF'
+[davosbot hook] Conventional commit required.
+
+Use:
+  type(scope): summary
+
+Allowed types:
+  feat, fix, docs, style, refactor, perf, test, build, ci, chore, ops
+
+Examples:
+  fix: harden reminder save confirmation
+  feat(images): add provider router
+  chore: refresh future queue
+EOF
+exit 1

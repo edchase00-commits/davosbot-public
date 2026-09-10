@@ -1,0 +1,9 @@
+certifi==2026.4.22
+charset-normalizer==3.4.7
+idna==3.13
+python-dotenv==1.2.2
+requests==2.33.1
+urllib3==2.6.3
+tavily-python==0.7.24
+openpyxl==3.1.5
+google-genai==2.8.0

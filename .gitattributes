@@ -1,0 +1,14 @@
+* text=auto
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.example text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=crlf
+*.js text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+.githooks/* text eol=lf
