@@ -1,0 +1,62 @@
+module.exports = {
+  apps: [
+    {
+      name: "davosbot",
+      script: "main.py",
+      interpreter: "/Users/<you>/projects/davosbot/venv/bin/python3",
+      watch: false,
+      restart_delay: 3000,
+      max_restarts: 10,
+      error_file: "/Users/<mac-user>/.pm2/logs/davosbot-err.log",
+      out_file: "/Users/<mac-user>/.pm2/logs/davosbot-out.log",
+      log_date_format: "YYYY-MM-DD HH:mm:ss",
+      env: {
+        PYTHONUNBUFFERED: "1",
+      },
+    },
+    {
+      name: "davosbot-autodeploy",
+      script: "scripts/auto_deploy.py",
+      interpreter: "/Users/<you>/projects/davosbot/venv/bin/python3",
+      watch: false,
+      autorestart: true,
+      restart_delay: 30000,
+      max_restarts: 10,
+      error_file: "/Users/<mac-user>/.pm2/logs/autodeploy-err.log",
+      out_file: "/Users/<mac-user>/.pm2/logs/autodeploy-out.log",
+      log_date_format: "YYYY-MM-DD HH:mm:ss",
+      env: {
+        PYTHONUNBUFFERED: "1",
+      },
+    },
+    {
+      name: "davosbot-local-image-worker",
+      script: "scripts/local_image_worker.py",
+      interpreter: "/Users/<you>/projects/davosbot/venv/bin/python3",
+      watch: false,
+      restart_delay: 3000,
+      max_restarts: 10,
+      error_file: "/Users/<mac-user>/.pm2/logs/davosbot-local-image-worker-err.log",
+      out_file: "/Users/<mac-user>/.pm2/logs/davosbot-local-image-worker-out.log",
+      log_date_format: "YYYY-MM-DD HH:mm:ss",
+      env: {
+        PYTHONUNBUFFERED: "1",
+      },
+    },
+    {
+      name: "davosbot-comfyui",
+      script: "/Users/<mac-user>/ComfyUI/main.py",
+      cwd: "/Users/<mac-user>/ComfyUI",
+      interpreter: "/Users/<mac-user>/ComfyUI/venv/bin/python",
+      watch: false,
+      restart_delay: 3000,
+      max_restarts: 10,
+      error_file: "/Users/<mac-user>/.pm2/logs/davosbot-comfyui-err.log",
+      out_file: "/Users/<mac-user>/.pm2/logs/davosbot-comfyui-out.log",
+      log_date_format: "YYYY-MM-DD HH:mm:ss",
+      env: {
+        PYTHONUNBUFFERED: "1",
+      },
+    },
+  ],
+};
