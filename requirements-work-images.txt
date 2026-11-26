@@ -1,0 +1,2 @@
+# Optional strict decoder for owner-authorized ChatGPT Work image blobs.
+Pillow==12.2.0
